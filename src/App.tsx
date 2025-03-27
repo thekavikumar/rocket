@@ -5,6 +5,8 @@ import QuerySelector from './components/QuerySelector';
 import ResultTable from './components/ResultTable';
 import { Query, DataRow, Theme } from './types';
 
+// nothing
+
 const AppContainer = styled.div<{ theme: Theme }>`
   display: grid;
   grid-template-rows: 25vh 60px 1fr; /* Adjusted to give table more flexible space */
