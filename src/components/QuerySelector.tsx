@@ -31,12 +31,7 @@ export const QuerySelector = React.memo<QuerySelectorProps>(
 
     return (
       <SelectorContainer>
-        <Select
-          onChange={handleChange}
-          theme={theme}
-          tabIndex={0}
-          aria-label="Select a predefined query"
-        >
+        <Select onChange={handleChange} theme={theme}>
           <option value="">Select a predefined query</option>
           {queries.map((query) => (
             <option key={query.id} value={query.id}>

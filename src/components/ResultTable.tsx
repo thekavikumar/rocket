@@ -10,6 +10,15 @@ const TableContainer = styled.div<{ theme: Theme }>`
   border-radius: 4px;
   overflow: hidden;
   background: ${({ theme }) => (theme === 'dark' ? '#2a2a2a' : '#fff')};
+  animation: fadeIn 0.5s ease-in-out;
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 `;
 
 const HeaderRow = styled.div<{ theme: Theme }>`
@@ -31,6 +40,19 @@ const Cell = styled.div<{ theme: Theme }>`
   color: ${({ theme }) => (theme === 'dark' ? '#fff' : '#000')};
 `;
 
+const HeaderCell = styled(Cell)<{ theme: Theme; sortable?: string }>`
+  cursor: ${({ sortable }) => (sortable === 'true' ? 'pointer' : 'default')};
+  user-select: none;
+  position: relative;
+`;
+
+const SortIndicator = styled.span<{ direction: 'asc' | 'desc' }>`
+  position: absolute;
+  right: 5px;
+  top: 50%;
+  transform: translateY(-50%);
+`;
+
 const ExportButton = styled.button<{ theme: Theme }>`
   margin: 10px;
   padding: 8px 16px;
@@ -44,57 +66,91 @@ const ExportButton = styled.button<{ theme: Theme }>`
 interface ResultTableProps {
   data: DataRow[];
   theme: Theme;
+  onSort: (key: keyof DataRow) => void;
+  sortConfig: { key: keyof DataRow | null; direction: 'asc' | 'desc' };
 }
 
-export const ResultTable = React.memo<ResultTableProps>(({ data, theme }) => {
-  const RowRenderer = ({
-    index,
-    style,
-  }: {
-    index: number;
-    style: React.CSSProperties;
-  }) => (
-    <Row style={style} theme={theme}>
-      <Cell theme={theme}>{data[index].id}</Cell>
-      <Cell theme={theme}>{data[index].name}</Cell>
-      <Cell theme={theme}>{data[index].age}</Cell>
-      <Cell theme={theme}>{data[index].email}</Cell>
-    </Row>
-  );
+export const ResultTable = React.memo<ResultTableProps>(
+  ({ data, theme, onSort, sortConfig }) => {
+    const RowRenderer = ({
+      index,
+      style,
+    }: {
+      index: number;
+      style: React.CSSProperties;
+    }) => (
+      <Row style={style} theme={theme}>
+        <Cell theme={theme}>{data[index].id}</Cell>
+        <Cell theme={theme}>{data[index].name}</Cell>
+        <Cell theme={theme}>{data[index].age}</Cell>
+        <Cell theme={theme}>{data[index].email}</Cell>
+      </Row>
+    );
 
-  const exportToCSV = () => {
-    const csv = [
-      'id,name,age,email',
-      ...data.map((row) => `${row.id},${row.name},${row.age},${row.email}`),
-    ].join('\n');
-    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
-    saveAs(blob, 'query_result.csv');
-  };
+    const exportToCSV = () => {
+      const csv = [
+        'id,name,age,email',
+        ...data.map((row) => `${row.id},${row.name},${row.age},${row.email}`),
+      ].join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8' });
+      saveAs(blob, 'query_result.csv');
+    };
 
-  return (
-    <TableContainer theme={theme}>
-      <HeaderRow theme={theme}>
-        <Cell theme={theme}>ID</Cell>
-        <Cell theme={theme}>Name</Cell>
-        <Cell theme={theme}>Age</Cell>
-        <Cell theme={theme}>Email</Cell>
-      </HeaderRow>
-      <FixedSizeList
-        height={400}
-        width="100%"
-        itemCount={data.length}
-        itemSize={35}
-      >
-        {RowRenderer}
-      </FixedSizeList>
-      <ExportButton
-        onClick={exportToCSV}
-        theme={theme}
-        tabIndex={0}
-        aria-label="Export results to CSV"
-      >
-        Export to CSV
-      </ExportButton>
-    </TableContainer>
-  );
-});
+    const getSortIndicator = (key: keyof DataRow) => {
+      if (sortConfig.key === key) {
+        return (
+          <SortIndicator direction={sortConfig.direction}>
+            {sortConfig.direction === 'asc' ? '▲' : '▼'}
+          </SortIndicator>
+        );
+      }
+      return null;
+    };
+
+    return (
+      <TableContainer theme={theme}>
+        <HeaderRow theme={theme}>
+          <HeaderCell
+            theme={theme}
+            sortable="true"
+            onClick={() => onSort('id')}
+          >
+            ID {getSortIndicator('id')}
+          </HeaderCell>
+          <HeaderCell
+            theme={theme}
+            sortable="true"
+            onClick={() => onSort('name')}
+          >
+            Name {getSortIndicator('name')}
+          </HeaderCell>
+          <HeaderCell
+            theme={theme}
+            sortable="true"
+            onClick={() => onSort('age')}
+          >
+            Age {getSortIndicator('age')}
+          </HeaderCell>
+          <HeaderCell
+            theme={theme}
+            sortable="true"
+            onClick={() => onSort('email')}
+          >
+            Email {getSortIndicator('email')}
+          </HeaderCell>
+        </HeaderRow>
+        <FixedSizeList
+          height={400}
+          width="100%"
+          itemCount={data.length}
+          itemSize={35}
+        >
+          {RowRenderer}
+        </FixedSizeList>
+        <ExportButton onClick={exportToCSV} theme={theme}>
+          Export to CSV
+        </ExportButton>
+      </TableContainer>
+    );
+  }
+);
