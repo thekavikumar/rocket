@@ -1,10 +1,10 @@
+import React from 'react';
 import { FixedSizeList } from 'react-window';
 import styled from 'styled-components';
 import { saveAs } from 'file-saver';
 import { DataRow, Theme } from '../types';
 
 const TableContainer = styled.div<{ theme: Theme }>`
-  border: 1px solid #ccc;
   height: 100%;
   border: 1px solid #ccc;
   border-radius: 4px;
@@ -46,7 +46,7 @@ interface ResultTableProps {
   theme: Theme;
 }
 
-const ResultTable: React.FC<ResultTableProps> = ({ data, theme }) => {
+export const ResultTable = React.memo<ResultTableProps>(({ data, theme }) => {
   const RowRenderer = ({
     index,
     style,
@@ -87,11 +87,14 @@ const ResultTable: React.FC<ResultTableProps> = ({ data, theme }) => {
       >
         {RowRenderer}
       </FixedSizeList>
-      <ExportButton onClick={exportToCSV} theme={theme}>
+      <ExportButton
+        onClick={exportToCSV}
+        theme={theme}
+        tabIndex={0}
+        aria-label="Export results to CSV"
+      >
         Export to CSV
       </ExportButton>
     </TableContainer>
   );
-};
-
-export default ResultTable;
+});

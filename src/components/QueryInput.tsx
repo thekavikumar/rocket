@@ -1,3 +1,4 @@
+import React from 'react';
 import styled from 'styled-components';
 import { Theme } from '../types';
 
@@ -42,27 +43,43 @@ interface QueryInputProps {
   onQueryChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   onRunQuery: () => void;
   theme: Theme;
+  isLoading: boolean;
 }
 
-const QueryInput: React.FC<QueryInputProps> = ({
+export const QueryInput: React.FC<QueryInputProps> = ({
   query,
   onQueryChange,
   onRunQuery,
   theme,
+  isLoading,
 }) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.ctrlKey && e.key === 'Enter' && !isLoading) {
+      onRunQuery();
+    }
+  };
+
   return (
     <InputContainer theme={theme}>
       <QueryTextArea
         value={query}
         onChange={onQueryChange}
+        onKeyDown={handleKeyDown}
         placeholder="Type your SQL query here..."
         theme={theme}
+        disabled={isLoading}
+        tabIndex={0}
+        aria-label="SQL query input"
       />
-      <RunButton theme={theme} onClick={onRunQuery}>
-        Run Query
+      <RunButton
+        theme={theme}
+        onClick={onRunQuery}
+        disabled={isLoading}
+        tabIndex={0}
+        aria-label="Run query"
+      >
+        {isLoading ? 'Running...' : 'Run Query'}
       </RunButton>
     </InputContainer>
   );
 };
-
-export default QueryInput;

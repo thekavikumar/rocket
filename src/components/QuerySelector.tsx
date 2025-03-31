@@ -1,3 +1,4 @@
+import React from 'react';
 import styled from 'styled-components';
 import { Query, Theme } from '../types';
 
@@ -20,29 +21,30 @@ interface QuerySelectorProps {
   theme: Theme;
 }
 
-const QuerySelector: React.FC<QuerySelectorProps> = ({
-  queries,
-  onSelect,
-  theme,
-}) => {
-  const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selectedId = parseInt(e.target.value, 10);
-    const selectedQuery = queries.find((q) => q.id === selectedId);
-    if (selectedQuery) onSelect(selectedQuery);
-  };
+export const QuerySelector = React.memo<QuerySelectorProps>(
+  ({ queries, onSelect, theme }) => {
+    const handleChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+      const selectedId = parseInt(e.target.value, 10);
+      const selectedQuery = queries.find((q) => q.id === selectedId);
+      if (selectedQuery) onSelect(selectedQuery);
+    };
 
-  return (
-    <SelectorContainer>
-      <Select onChange={handleChange} theme={theme}>
-        <option value="">Select a predefined query</option>
-        {queries.map((query) => (
-          <option key={query.id} value={query.id}>
-            Query {query.id}: {query.text}
-          </option>
-        ))}
-      </Select>
-    </SelectorContainer>
-  );
-};
-
-export default QuerySelector;
+    return (
+      <SelectorContainer>
+        <Select
+          onChange={handleChange}
+          theme={theme}
+          tabIndex={0}
+          aria-label="Select a predefined query"
+        >
+          <option value="">Select a predefined query</option>
+          {queries.map((query) => (
+            <option key={query.id} value={query.id}>
+              Query {query.id}: {query.text}
+            </option>
+          ))}
+        </Select>
+      </SelectorContainer>
+    );
+  }
+);
